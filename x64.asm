@@ -7,12 +7,6 @@ zero: dd 0.0
 one: dd 1.0
 maxByte: dd 256.0
 
-clickedXd dq 0
-clickedYd dq 0
-imSized dq 0
-
-
-
 ; Here start code section
 section .text
 
@@ -117,28 +111,38 @@ color_row:
 
 	; XMM1 <--- Our sinus !!!!
 
+	;---------B----------------------
+	mov r8b, [imagePointer]
+	mov r9b, [secondImagePointer]
+
+	jmp blendB
+endBlendingB:
+
+	;write B to image pixel
+	mov byte [imagePointer], al
+	;---------G----------------
+	inc imagePointer
+	inc secondImagePointer
 
 	mov r8b, [imagePointer]
 	mov r9b, [secondImagePointer]
-	jmp blendB
 
-endBlendingB:
-	;----------B---------------
-	mov  bl, [secondImagePointer]
-	;write B to image pixel
-	mov byte [imagePointer], bl
-	;---------G----------------
-	inc secondImagePointer
-	mov  bl, [secondImagePointer]
-	;write G to image pixel
+	jmp blendG
+endBlendingG:
+
+	mov byte [imagePointer], al
+
+	;-----R-----------------
 	inc imagePointer
-	mov byte [imagePointer], bl
-
 	inc secondImagePointer
-	mov  bl, [secondImagePointer]
+
+	mov r8b, [imagePointer]
+	mov r9b, [secondImagePointer]
+
+	jmp blendR
+endBlendingR:
 	;write R to image pixel
-	inc imagePointer
-	mov byte [imagePointer], bl
+	mov byte [imagePointer], al
 
 
 	add imagePointer, 2
@@ -167,8 +171,56 @@ next_row:
 ;-------------------
 ;BLEND
 blendB:
+;COL = COLs*A + COLd(1-A)
+	movss xmm0, [one]
+	subss xmm0, xmm1
+
+	cvtsi2ss xmm2, r8
+	cvtsi2ss xmm3, r9
+
+	mulss xmm2, xmm1
+	mulss xmm3, xmm0
+
+	addss xmm2, xmm3
+
+	cvtss2si eax, xmm2
 
 	jmp endBlendingB
+
+blendG:
+;COL = COLs*A + COLd(1-A)
+	movss xmm0, [one]
+	subss xmm0, xmm1
+
+	cvtsi2ss xmm2, r8
+	cvtsi2ss xmm3, r9
+
+	mulss xmm2, xmm1
+	mulss xmm3, xmm0
+
+	addss xmm2, xmm3
+
+	cvtss2si eax, xmm2
+
+	jmp endBlendingG
+
+blendR:
+;COL = COLs*A + COLd(1-A)
+	movss xmm0, [one]
+	subss xmm0, xmm1
+
+	cvtsi2ss xmm2, r8
+	cvtsi2ss xmm3, r9
+
+	mulss xmm2, xmm1
+	mulss xmm3, xmm0
+
+	addss xmm2, xmm3
+
+	cvtss2si eax, xmm2
+
+	jmp endBlendingR
+
 
 
 endl:
