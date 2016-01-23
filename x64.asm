@@ -39,8 +39,8 @@ _xd:
 	;%define nativePointer	rcx
 	;%define nativeSecondPointer		rdx
 	;--------------------------------
-	%define imagePointer 					rcx
-	%define secondImagePointer 		rdx
+	;%define imagePointer 					rcx
+	;%define secondImagePointer 		rdx
 
 	; Begin
 	; Load argumants on stack
@@ -54,23 +54,21 @@ _xd:
 	mov clickedY, eax
 
 	;inicialize pointers
-	mov imagePointer, rcx
-	mov secondImagePointer, rdx
+	;mov imagePointer, rcx
+	;mov secondImagePointer, rdx
 	;inicialize image pointer
 
 
 	;prepare registers
 	;used registers RCX, RDX, R11, R12
 
+	;initial (X,Y) position
 	mov r11, 0
 	mov r12, 0
 	;sub r12, 1
 
 
 color_row:
-	;call blending
-	;BGR - color send
-	;need three registers for saving color
 
 	;---------SINUS-------------------
   ;X
@@ -112,41 +110,81 @@ color_row:
 	; XMM1 <--- Our sinus !!!!
 
 	;---------B----------------------
-	mov r8b, [imagePointer]
-	mov r9b, [secondImagePointer]
 
-	jmp blendB
-endBlendingB:
 
+
+;----------------blendB---------------
+	movss xmm0, [one]
+	subss xmm0, xmm1
+; 1 - a
+	mov r14b, [rcx]
+	mov r15b, [rdx]
+	cvtsi2ss xmm2, r14
+	cvtsi2ss xmm3, r15
+;
+	mulss xmm2, xmm1
+	mulss xmm3, xmm0
+
+	addss xmm2, xmm3
+
+	cvtss2si eax, xmm2
+;--------------------------------------------
 	;write B to image pixel
-	mov byte [imagePointer], al
+	mov byte [rcx], al
 	;---------G----------------
-	inc imagePointer
-	inc secondImagePointer
+	inc rcx
+	inc rdx
 
-	mov r8b, [imagePointer]
-	mov r9b, [secondImagePointer]
+	;--------------------------blendG---------------
+	movss xmm0, [one]
+	subss xmm0, xmm1
 
-	jmp blendG
-endBlendingG:
+	mov r14b, [rcx]
+	mov r15b, [rdx]
+	cvtsi2ss xmm2, r14
+	cvtsi2ss xmm3, r15
 
-	mov byte [imagePointer], al
+	mulss xmm2, xmm1
+	mulss xmm3, xmm0
+
+	addss xmm2, xmm3
+
+	cvtss2si eax, xmm2
+
+	;----------------------------------------
+
+	mov byte [rcx], al
 
 	;-----R-----------------
-	inc imagePointer
-	inc secondImagePointer
+	inc rcx
+	inc rdx
 
-	mov r8b, [imagePointer]
-	mov r9b, [secondImagePointer]
 
-	jmp blendR
-endBlendingR:
+
+	;------------------BlendR------------
+	movss xmm0, [one]
+	subss xmm0, xmm1
+
+	mov r14b, [rcx]
+	mov r15b, [rdx]
+	cvtsi2ss xmm2, r14
+	cvtsi2ss xmm3, r15
+
+	mulss xmm2, xmm1
+	mulss xmm3, xmm0
+
+	addss xmm2, xmm3
+
+	cvtss2si eax, xmm2
+	;-----------------------------------------------
+
+
 	;write R to image pixel
-	mov byte [imagePointer], al
+	mov byte [rcx], al
 
 
-	add imagePointer, 2
-	add secondImagePointer, 2
+	add rcx, 2
+	add rdx, 2
 	inc r11
 	;--------
 	mov eax, imageWidth
@@ -167,60 +205,6 @@ next_row:
 	cmp r12, rax
 	jle color_row
 	jmp endl
-
-;-------------------
-;BLEND
-blendB:
-;COL = COLs*A + COLd(1-A)
-	movss xmm0, [one]
-	subss xmm0, xmm1
-
-	cvtsi2ss xmm2, r8
-	cvtsi2ss xmm3, r9
-
-	mulss xmm2, xmm1
-	mulss xmm3, xmm0
-
-	addss xmm2, xmm3
-
-	cvtss2si eax, xmm2
-
-	jmp endBlendingB
-
-blendG:
-;COL = COLs*A + COLd(1-A)
-	movss xmm0, [one]
-	subss xmm0, xmm1
-
-	cvtsi2ss xmm2, r8
-	cvtsi2ss xmm3, r9
-
-	mulss xmm2, xmm1
-	mulss xmm3, xmm0
-
-	addss xmm2, xmm3
-
-	cvtss2si eax, xmm2
-
-	jmp endBlendingG
-
-blendR:
-;COL = COLs*A + COLd(1-A)
-	movss xmm0, [one]
-	subss xmm0, xmm1
-
-	cvtsi2ss xmm2, r8
-	cvtsi2ss xmm3, r9
-
-	mulss xmm2, xmm1
-	mulss xmm3, xmm0
-
-	addss xmm2, xmm3
-
-	cvtss2si eax, xmm2
-
-	jmp endBlendingR
-
 
 
 endl:
