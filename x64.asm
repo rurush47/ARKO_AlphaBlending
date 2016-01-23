@@ -65,9 +65,9 @@ _xd:
 
 	;prepare registers
 	;used registers RCX, RDX, R11, R12
-	add imagePointer, 0
-	mov r11d, imageWidth
-	mov r12d, imageWidth
+
+	mov r11d, 0
+	mov r12d, 0
 	sub r12, 1
 
 
@@ -93,17 +93,25 @@ endBlendingB:
 
 	add imagePointer, 4
 	add secondImagePointer, 4
-	dec r11
-	cmp r11, 0
-	jge color_row
+	inc r11
+	;--------
+	mov eax, imageWidth
+	dec eax
+	;--------
+	cmp r11, rax
+	jle color_row
 	jmp next_row
 
 
 next_row:
-	mov r11d, imageWidth
-	dec r12
-	cmp r12, 1
-	jge color_row
+	mov r11d, 0
+	inc r12
+	;--------
+	mov eax, imageWidth
+	sub eax, 2
+	;--------
+	cmp r12, rax
+	jle color_row
 	jmp endl
 
 ;-------------------
