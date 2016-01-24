@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
 
 			al_draw_bitmap(pBitmap, 0, 0, 0);
 			al_flip_display();
-			// al_clear_to_color(al_map_rgba(0, 0, 0, 1));
+			al_clear_to_color(al_map_rgba(0, 0, 0, 1));
 
 
 		}

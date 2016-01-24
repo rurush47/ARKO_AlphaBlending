@@ -5,7 +5,9 @@ section .data
 six: dd 6.0
 zero: dd 0.0
 one: dd 1.0
+onehtw: dd 120.0
 maxByte: dd 256.0
+sevenF: dd 5040.0
 
 ; Here start code section
 section .text
@@ -70,7 +72,7 @@ _xd:
 
 color_row:
 
-	;---------SINUS-------------------
+	;---------Pitagoras-------------------
   ;X
 	cvtsi2ss xmm0, r11
 	;Xc
@@ -107,12 +109,35 @@ color_row:
 	divss xmm1, [six]
 	addss xmm1, xmm0
 
+	; x-x^3/6
+	;---------X^5----------------------
+	movss xmm2, xmm0
+
+	mulss xmm2, xmm0
+	mulss xmm2, xmm0
+	mulss xmm2, xmm0
+	mulss xmm2, xmm0
+
+	divss xmm2, [onehtw]
+
+	; x-x^3/6+x^5/120
+	addss xmm1, xmm2
+
+	movss xmm2, [zero]
+	subss xmm2, xmm0
+
+	mulss xmm2, xmm0
+	mulss xmm2, xmm0
+	mulss xmm2, xmm0
+	mulss xmm2, xmm0
+	mulss xmm2, xmm0
+	mulss xmm2, xmm0
+
+	divss xmm2, [sevenF]
+	;x-x^3/6 + x^5/120 - x^7 /
+	subss xmm1, xmm2
+
 	; XMM1 <--- Our sinus !!!!
-
-	;---------B----------------------
-
-
-
 ;----------------blendB---------------
 	movss xmm0, [one]
 	subss xmm0, xmm1
